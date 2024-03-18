@@ -16,7 +16,7 @@ const CarEditPage: React.FC<Props> = ({cars}) => {
     const navigate = useNavigate();
 
     if(isNaN(carId)){
-        return <div>
+        return <div data-testId='car-edit-page-none'>
             <Typography variant='h3'>No car selected</Typography>
             <Link component={RouterLink} to="/">Back to Home</Link>
             </div>

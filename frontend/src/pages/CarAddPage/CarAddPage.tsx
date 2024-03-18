@@ -33,7 +33,7 @@ const CarAddPage: React.FC<Props> = ({cars}) => {
     }
 
     return (
-        <div className='car-add-page'>
+        <div className='car-add-page' data-testId='car-add-page'>
             <Typography variant="h3">Add a Car</Typography>
             <form onSubmit={handleSubmit}>
                 <div>
@@ -49,7 +49,7 @@ const CarAddPage: React.FC<Props> = ({cars}) => {
                     <TextField type="text" value={state.color} label="Color" onChange={(e) => setState({...state, color: e.target.value})} />
                 </div>
                 <div>
-                    <Button type="submit">Add Car</Button>
+                    <Button type="submit" data-testId='add-button'>Add Car</Button>
                 </div>
                 <RouterLink to="/">
                     <Button>Bact to Home</Button>

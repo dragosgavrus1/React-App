@@ -38,7 +38,7 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
     }
 
     return (
-        <div className='car-list-page'>
+        <div className='car-list-page' data-testId='car-list-page'>
             <Typography variant="h3">List of Cars</Typography>
 
             <TableContainer component={Paper}>
