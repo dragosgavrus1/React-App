@@ -1,0 +1,33 @@
+.car-list-page {
+    max-width: 600px;
+    margin: 0 auto;
+}
+  
+.car-list-page .MuiTypography-h3 {
+  margin: 10px;
+  font-size: 40px;
+  font-weight: bold;
+  color: #333;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.car-list-page .MuiButton.root{
+  background-color: black;
+}
+
+.car-list-page .MuiButton.normal-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px; 
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.car-list-page .MuiButton.normal-button:hover {
+  background-color: #0056b3;
+}
+
