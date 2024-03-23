@@ -1,6 +1,7 @@
 .car-edit-page {
     max-width: 600px;
     margin: 0 auto;
+    text-align: center;
 }
 
 .car-edit-page .MuiButton-root{
