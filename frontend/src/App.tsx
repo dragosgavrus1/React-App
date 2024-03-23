@@ -17,6 +17,8 @@ function App() {
     new Car(4, "Chevrolet", "Camaro", 2020, "Black"),
   ]);
 
+  const [car, setCar] = useState<Car | null>(null);
+
   return (
       <Router>
         <div className="App">

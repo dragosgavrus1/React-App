@@ -18,10 +18,15 @@ const CarAddPage: React.FC<Props> = ({cars}) => {
         color: ''
     });
 
+    const sortCars = () =>{
+        cars.sort((a, b) => a.getMake().localeCompare(b.getMake()));
+    }
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const newCar = new Car(cars.length+1, state.make, state.model, state.year, state.color);
         cars.push(newCar);
+        sortCars();
         if (setState) {
             setState({
                 make: '',

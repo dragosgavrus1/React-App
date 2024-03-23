@@ -6,6 +6,7 @@ import {  Typography , Link, Table, TableContainer, Paper, TableHead, TableBody,
 import { DialogActions, DialogContentText, DialogContent, IconButton} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { PieChart } from '@mui/x-charts';
 
 
 interface Props {
@@ -19,7 +20,6 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
     const handleCarClick = (car: Car) => {
         setSelectedCar(car);
     }
-
 
     const handleClose = () => {
         setOpen(false);
@@ -36,6 +36,27 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
         }
         setOpen(false);
     }
+
+    const sortCars = () =>{
+        cars.sort((a, b) => a.getMake().localeCompare(b.getMake()));
+    }
+    sortCars();
+
+    const chartData = cars.reduce((acc: { [key: string]: number }, car) => {
+        const make = car.getMake();
+        if (acc[make]) {
+            acc[make] += 1;
+        } else {
+            acc[make] = 1;
+        }
+        return acc;
+    }, {});
+    
+    const pieChartData = Object.keys(chartData).map((make) => ({
+        id: make,
+        label: make,
+        value: chartData[make],
+    }));
 
     return (
         <div className='car-list-page' data-testId='car-list-page'>
@@ -74,6 +95,13 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
 
                 </Table>
             </TableContainer>
+            
+            <PieChart 
+                series={[
+                    {
+                    data: pieChartData,
+                    },
+                ]} width={300} height={300}/> 
             
             <Dialog open={open} onClose={handleClose}>
                 <DialogContent>

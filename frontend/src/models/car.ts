@@ -27,6 +27,19 @@ class Car{
     public getColor(): string {
         return this.color;
     }
+    public setMake(make: string): void {
+        this.make = make;
+    }
+    public setModel(model: string): void {
+        this.model = model;
+    }
+    public setYear(year: number): void {
+        this.year = year;
+    }
+    public setColor(color: string): void {
+        this.color = color;
+    }
+
 }
 
 export default Car;

@@ -17,6 +17,8 @@ test('test displays CarListPage render', () => {
     );
 
     const linkElement = screen.getByTestId('car-list-page');
+    const fordElement = screen.getByText('Ford');
+    expect(fordElement).toBeInTheDocument();
     expect(linkElement).toBeInTheDocument();
 
 });

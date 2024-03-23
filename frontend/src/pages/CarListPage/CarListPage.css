@@ -1,6 +1,7 @@
 .car-list-page {
-    max-width: 600px;
-    margin: 0 auto;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
 }
   
 .car-list-page .MuiTypography-h3 {

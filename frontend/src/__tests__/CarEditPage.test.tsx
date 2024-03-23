@@ -1,24 +1,45 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { expect, test, vi} from 'vitest';
 import Car from '../models/car';
 import CarEditPage from '../pages/CarEditPage/CarEditPage';
+import {test, expect,vi} from 'vitest';
+import userEvent from '@testing-library/user-event';
 
-test('test displays CarListPage render', () => {
+test('test displays CarEditPage render', () => {
     const cars: Car[] = [
-        new Car(1, 'Ford', 'Fusion', 2019, 'black'),
+        new Car(123, 'Ford', 'Fusion', 2019, 'black'),
         new Car(2, 'Chevy', 'Volt', 2018, 'blue'),
     ];
+
+    vi.mock('react-router-dom', async () => {
+        const mod = await vi.importActual('react-router-dom');
+        return {
+          ...mod,
+          useParams: () => ({
+            id: "123",
+          }),
+        };
+    });
     
+    const setCars = vi.fn();
+
     render(
         <BrowserRouter>
-            <CarEditPage cars={cars} setCars={vi.fn()} />
+            <CarEditPage cars={cars} setCars={setCars} />
         </BrowserRouter>
     );
-    
-    // no id is given bc the useParams hook is not being used in the test
-    const linkElement = screen.getByTestId('car-edit-page-none');
-    expect(linkElement).toBeInTheDocument();
 
+    const buttonElement = screen.getByTestId('edit-button');
+    const data = screen.getByTestId('make-field');
+    //fireEvent.change(data, { target: { value: 'Toyota' } });
+    userEvent.type(data, 'Toyota');
+    fireEvent.click(buttonElement);
+    
+    expect(buttonElement).toBeInTheDocument();
+    expect(data).toBeInTheDocument();
+    
+    
+    expect(setCars).toHaveBeenCalledTimes(1);
+    
 });

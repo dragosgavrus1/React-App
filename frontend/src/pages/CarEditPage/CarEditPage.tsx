@@ -9,7 +9,7 @@ interface Props {
     setCars: (cars: Car[]) => void;
 }
 
-const CarEditPage: React.FC<Props> = ({cars}) => {
+const CarEditPage: React.FC<Props> = ({cars, setCars}) => {
     
     const {id} = useParams();
     const carId = parseInt(id ?? '', 10);
@@ -31,18 +31,31 @@ const CarEditPage: React.FC<Props> = ({cars}) => {
         color: car?.getColor() || ''
     });
 
+    const sortCars = () =>{
+        cars.sort((a, b) => a.getMake().localeCompare(b.getMake()));
+    }
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        cars[carId-1] = new Car(carId, state.make, state.model, state.year, state.color);
+
+        const updatedCars = cars.map((car) => {
+            if (car.getId() === carId) {
+                return new Car(carId,state.make,state.model,state.year,state.color);
+            }
+            return car;
+        });
+
+        setCars(updatedCars);
+        sortCars();
         navigate('/');
     }
 
     return (
-        <div className='car-edit-page'>
+        <div className='car-edit-page' data-testId='car-edit-page'>
             <Typography variant="h3">Edit Car {id}</Typography>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <TextField type="text" value={state.make} label="Make" onChange={(e) => setState({...state, make: e.target.value})} />
+                    <TextField type="text" data-testId="make-field" value={state.make} label="Make" onChange={(e) => setState({...state, make: e.target.value})} />
                 </div>
                 <div>
                     <TextField type="text" value={state.model} label="Model" onChange={(e) => setState({...state, model: e.target.value})} />
@@ -54,7 +67,7 @@ const CarEditPage: React.FC<Props> = ({cars}) => {
                     <TextField type="text" value={state.color} label="Color" onChange={(e) => setState({...state, color: e.target.value})} />
                 </div>
                 <div>
-                    <Button type="submit">Edit Car</Button>
+                    <Button type="submit" data-testId="edit-button">Edit Car</Button>
                 </div>
                 <RouterLink to="/">
                     <Button>Bact to Home</Button>
