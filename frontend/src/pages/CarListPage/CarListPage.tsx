@@ -2,7 +2,7 @@ import React from 'react';
 import Car from '../../models/car';
 import { Link as RouterLink } from 'react-router-dom';
 import './CarListPage.css';
-import {  Typography , Link, Table, TableContainer, Paper, TableHead, TableBody, TableRow, TableCell, Button, Dialog} from '@mui/material';
+import {  Typography , Link, Table, TableContainer, Paper, TableHead, TableBody, TableRow, TableCell, Button, Dialog, TablePagination, TableFooter} from '@mui/material';
 import { DialogActions, DialogContentText, DialogContent, IconButton} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,6 +16,22 @@ interface Props {
 const CarListPage: React.FC<Props> = ({ cars}) => {
     const [selectedCar, setSelectedCar] = React.useState<Car | null>(null);
     const [open, setOpen] = React.useState(false);
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+    const handleChangePage = (
+        event: React.MouseEvent<HTMLButtonElement> | null,
+        newPage: number,
+    ) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     const handleCarClick = (car: Car) => {
         setSelectedCar(car);
@@ -75,7 +91,8 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
                     </TableHead>
 
                     <TableBody>
-                        {cars.map((car) => (
+                        {(cars.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        ).map((car) => (
                             <TableRow key={car.getId()} onClick={() => handleCarClick(car)} selected={selectedCar===car} hover>
                                 <TableCell>{car.getMake()}</TableCell>
                                 <TableCell>{car.getModel()}</TableCell>
@@ -92,16 +109,33 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
                             </TableRow>)
                         )}
                     </TableBody>
-
+                    
+                    <TableFooter>
+                        <TablePagination 
+                            count={20} 
+                            page={page} 
+                            onPageChange={handleChangePage} 
+                            rowsPerPage={rowsPerPage} 
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            rowsPerPageOptions={[1,5,10]}/>
+                    </TableFooter>
                 </Table>
             </TableContainer>
+
             
             <PieChart 
-                series={[
-                    {
-                    data: pieChartData,
-                    },
-                ]} width={300} height={300}/> 
+                    series={[
+                        {
+                        data: pieChartData,
+                        },
+                    ]} width={300} 
+                    height={200}
+                    slotProps={{
+                        legend: {
+                            hidden: true,
+                        },
+                    }}
+                /> 
             
             <Dialog open={open} onClose={handleClose}>
                 <DialogContent>
