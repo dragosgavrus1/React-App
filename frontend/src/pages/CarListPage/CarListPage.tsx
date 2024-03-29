@@ -20,7 +20,7 @@ const CarListPage: React.FC<Props> = ({ cars}) => {
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
     const handleChangePage = (
-        event: React.MouseEvent<HTMLButtonElement> | null,
+        _event: React.MouseEvent<HTMLButtonElement> | null,
         newPage: number,
     ) => {
         setPage(newPage);
