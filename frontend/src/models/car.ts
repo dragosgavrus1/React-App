@@ -15,6 +15,9 @@ class Car{
     public getId(): number {
         return this.id;
     }
+    public setId(id: number): void {
+        this.id = id;
+    }
     public getMake(): string {
         return this.make;
     }
