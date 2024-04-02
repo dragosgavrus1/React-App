@@ -1,26 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Car from '../../models/car';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import './CarDetailPage.css';
 import { Typography, Link, Button } from '@mui/material';
-import { CarsContext } from '../../App';
+import axios from 'axios';
 
 
 
 const CarDetailPage: React.FC = () => {
 
-    const cars = React.useContext(CarsContext);
-    const {id} = useParams();
-    const carId = parseInt(id ?? '', 10);
-    if(isNaN(carId)){
-        return <div data-testId='car-detail-page-none'>
-            <Typography variant='h3'>No car selected</Typography>
-            <Link component={RouterLink} to="/"><Button>Back to Home</Button></Link>
-            </div>
-        ;
-    }
+    const { id } = useParams<{ id: string }>(); // Get the ID from the URL params
+    const [car, setCar] = useState<Car | null>(null); // State to store car data
 
-    const car: Car | undefined = cars.find((car) => car.getId() === carId);
+    useEffect(() => {
+        const fetchCar = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/${id}`); // Fetch car details from the API
+                const carData: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
+                setCar(carData);
+            } catch (error) {
+                console.error('Error fetching car details:', error);
+            }
+        };
+
+        fetchCar(); // Call the fetchCar function when the component mounts
+    }, [id]); // Include id in the dependency array to re-fetch car details when id changes
+
+
 
     return (
         <div className='car-detail-page' data-testId='car-detail-page'>

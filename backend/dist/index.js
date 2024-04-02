@@ -77,11 +77,13 @@ app.post('/api', (req, res) => {
 // Update entity
 app.put('/api/:id', (req, res) => {
     const id = parseInt(req.params.id);
-    const { make, model } = req.body;
+    const { make, model, year, color } = req.body;
     const car = cars.find((c) => c.getId() === id);
     if (car) {
         car.setMake(make);
         car.setModel(model);
+        car.setYear(year);
+        car.setColor(color);
         res.json({
             id: car.getId(),
             make: car.getMake(),

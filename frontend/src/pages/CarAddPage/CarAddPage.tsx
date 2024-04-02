@@ -4,6 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import './CarAddPage.css'
 import { Button, TextField, Typography } from '@mui/material';
 import { CarsContext } from '../../App';
+import axios from 'axios';
 
 interface Props {
     setCars: (cars: Car[]) => void;
@@ -23,19 +24,27 @@ const CarAddPage: React.FC<Props> = () => {
         cars.sort((a, b) => a.getMake().localeCompare(b.getMake()));
     }
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const newCar = new Car(cars.length+1, state.make, state.model, state.year, state.color);
-        cars.push(newCar);
-        sortCars();
-        if (setState) {
-            setState({
-                make: '',
-                model: '',
-                year: 0,
-                color: ''
-            });
+        try {
+            const response = await axios.post('http://localhost:3000/api', state);
+            const newCarData = response.data;
+            const newCar = new Car(newCarData.id, newCarData.make, newCarData.model, newCarData.year, newCarData.color);
+            cars.push(newCar);
+            sortCars();
+            if (setState) {
+                setState({
+                    make: '',
+                    model: '',
+                    year: 0,
+                    color: ''
+                });
+            }
         }
+        catch (error) {
+            console.error('Error adding car:', error);
+        }
+        
     }
 
     return (

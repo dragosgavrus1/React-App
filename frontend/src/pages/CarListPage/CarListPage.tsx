@@ -8,6 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PieChart } from '@mui/x-charts';
 import { CarsContext } from '../../App';
+import axios from 'axios';
 
 
 const CarListPage: React.FC = () => {
@@ -44,11 +45,18 @@ const CarListPage: React.FC = () => {
         setOpen(true);
     }
 
-    const handleDelete = () => {
-        if (selectedCar) {
-            cars.splice(cars.indexOf(selectedCar), 1);
+    const handleDelete = async () => {
+        try {
+            if (selectedCar) {
+                // Make a DELETE request to the backend API to delete the selected car
+                await axios.delete(`http://localhost:3000/api/${selectedCar.getId()}`);
+                
+                cars.splice(cars.indexOf(selectedCar), 1);
+            }
+            setOpen(false);
+        } catch (error) {
+            console.error('Error deleting car:', error);
         }
-        setOpen(false);
     }
 
     const sortCars = () =>{

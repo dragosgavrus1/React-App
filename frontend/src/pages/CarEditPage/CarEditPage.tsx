@@ -1,30 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Car from '../../models/car';
 import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
-import { Button, TextField, Typography, Link } from '@mui/material';
+import { Button, TextField, Typography } from '@mui/material';
 import './CarEditPage.css';
 import { CarsContext } from '../../App';
+import axios from 'axios';
 
 interface Props {
     setCars: (cars: Car[]) => void;
 }
 
 const CarEditPage: React.FC<Props> = ({setCars}) => {
-    
-    const cars = React.useContext(CarsContext);
-    const {id} = useParams();
-    const carId = parseInt(id ?? '', 10);
+
     const navigate = useNavigate();
-
-    if(isNaN(carId)){
-        return <div data-testId='car-edit-page-none'>
-            <Typography variant='h3'>No car selected</Typography>
-            <Link component={RouterLink} to="/">Back to Home</Link>
-            </div>
-        ;
-    }
-    const car: Car | undefined = cars.find((car) => car.getId() === carId);
-
+    const cars = React.useContext(CarsContext);
+    const { id } = useParams<{ id: string }>(); // Get the ID from the URL params
+    const [car, setCar] = React.useState<Car | null>(null);
     const [state, setState] = React.useState({
         make: car?.getMake() || '',
         model: car?.getModel() || '',
@@ -32,23 +23,45 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
         color: car?.getColor() || ''
     });
 
+    useEffect(() => {
+        const fetchCar = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/${id}`); // Fetch car details from the API
+                const carData: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
+                setState({make: carData.getMake(), model: carData.getModel(), year: carData.getYear(), color: carData.getColor()});
+                setCar(carData);
+            } catch (error) {
+                console.error('Error fetching car details:', error);
+            }
+        };
+
+        fetchCar(); // Call the fetchCar function when the component mounts
+    }, [id]); // Include id in the dependency array to re-fetch car details when id changes
+
+
     const sortCars = () =>{
         cars.sort((a, b) => a.getMake().localeCompare(b.getMake()));
     }
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        try {
+            const response = await axios.put(`http://localhost:3000/api/${id}`, state);
+            console.log(response);
+            
+            const updatedCar: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
+            setCar(updatedCar);
 
-        const updatedCars = cars.map((car) => {
-            if (car.getId() === carId) {
-                return new Car(carId,state.make,state.model,state.year,state.color);
-            }
-            return car;
-        });
+            // Optionally, update the cars array if needed
+            const updatedCars = cars.map(car => car.getId() === updatedCar.getId() ? updatedCar : car);
+            setCars(updatedCars);
 
-        setCars(updatedCars);
-        sortCars();
-        navigate('/');
+            sortCars();
+            navigate('/');
+        }
+        catch (error) {
+            console.error('Error updating car:', error);
+        }
     }
 
     return (
@@ -56,16 +69,16 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
             <Typography variant="h3">Edit Car {id}</Typography>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <TextField type="text" data-testId="make-field" value={state.make} label="Make" onChange={(e) => setState({...state, make: e.target.value})} />
+                    <TextField type="text" data-testId="make-field" value={state.make} label="Make" onChange={(e) => setState(prevState => ({...prevState, make: e.target.value}))} />
                 </div>
                 <div>
-                    <TextField type="text" value={state.model} label="Model" onChange={(e) => setState({...state, model: e.target.value})} />
+                    <TextField type="text" value={state.model} label="Model" onChange={(e) => setState(prevState => ({...prevState, model: e.target.value}))} />
                 </div>
                 <div>
-                    <TextField type="number" value={state.year} label="Year" onChange={(e) => setState({...state, year: parseInt(e.target.value)})} />
+                    <TextField type="number" value={state.year} label="Year" onChange={(e) => setState(prevState => ({...prevState, year: parseInt(e.target.value)}))} />
                 </div>
                 <div>
-                    <TextField type="text" value={state.color} label="Color" onChange={(e) => setState({...state, color: e.target.value})} />
+                    <TextField type="text" value={state.color} label="Color" onChange={(e) => setState(prevState => ({...prevState, color: e.target.value}))} />
                 </div>
                 <div>
                     <Button type="submit" data-testId="edit-button">Edit Car</Button>
