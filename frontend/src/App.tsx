@@ -4,10 +4,11 @@ import Car from './models/car'
 import CarDetailPage from './pages/CarDetailPage/CarDetailPage'
 import CarListPage from './pages/CarListPage/CarListPage'
 import CarAddPage from './pages/CarAddPage/CarAddPage'
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import CarEditPage from './pages/CarEditPage/CarEditPage'
 import axios from 'axios'
 
+export const CarsContext = createContext<Car[]>([]);
 
 function App() {
 
@@ -31,17 +32,19 @@ function App() {
 
 
   return (
+    <CarsContext.Provider value={cars}>
       <Router>
         <div className="App">
           <Routes>
-            <Route path="/" element={<CarListPage cars={cars}  />} />
-            <Route path="/car/:id" element={<CarDetailPage cars={cars} />} />
-            <Route path="/add" element={<CarAddPage cars={cars}  setCars={setCars}/>} />
-            <Route path="/edit/:id" element={<CarEditPage cars={cars}  setCars={setCars}/>} />
+            <Route path="/" element={<CarListPage />} />
+            <Route path="/car/:id" element={<CarDetailPage  />} />
+            <Route path="/add" element={<CarAddPage setCars={setCars}/>} />
+            <Route path="/edit/:id" element={<CarEditPage  setCars={setCars}/>} />
           </Routes>
 
         </div>
       </Router>
+    </CarsContext.Provider>
   );
 }
 

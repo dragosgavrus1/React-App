@@ -3,14 +3,13 @@ import Car from '../../models/car';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import './CarDetailPage.css';
 import { Typography, Link, Button } from '@mui/material';
+import { CarsContext } from '../../App';
 
 
-interface Props {
-    cars: Car[];
-}
 
-const CarDetailPage: React.FC<Props> = ({ cars }) => {
+const CarDetailPage: React.FC = () => {
 
+    const cars = React.useContext(CarsContext);
     const {id} = useParams();
     const carId = parseInt(id ?? '', 10);
     if(isNaN(carId)){

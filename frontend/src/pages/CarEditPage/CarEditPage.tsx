@@ -3,14 +3,15 @@ import Car from '../../models/car';
 import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
 import { Button, TextField, Typography, Link } from '@mui/material';
 import './CarEditPage.css';
+import { CarsContext } from '../../App';
 
 interface Props {
-    cars: Car[];
     setCars: (cars: Car[]) => void;
 }
 
-const CarEditPage: React.FC<Props> = ({cars, setCars}) => {
+const CarEditPage: React.FC<Props> = ({setCars}) => {
     
+    const cars = React.useContext(CarsContext);
     const {id} = useParams();
     const carId = parseInt(id ?? '', 10);
     const navigate = useNavigate();

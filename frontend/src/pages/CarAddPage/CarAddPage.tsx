@@ -3,14 +3,15 @@ import Car from '../../models/car';
 import { Link as RouterLink } from 'react-router-dom';
 import './CarAddPage.css'
 import { Button, TextField, Typography } from '@mui/material';
+import { CarsContext } from '../../App';
 
 interface Props {
-    cars: Car[];
     setCars: (cars: Car[]) => void;
 }
 
-const CarAddPage: React.FC<Props> = ({cars}) => {
+const CarAddPage: React.FC<Props> = () => {
     
+    const cars = React.useContext(CarsContext);
     const [state, setState] = React.useState({
         make: '',
         model: '',

@@ -7,13 +7,11 @@ import { DialogActions, DialogContentText, DialogContent, IconButton} from '@mui
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PieChart } from '@mui/x-charts';
+import { CarsContext } from '../../App';
 
 
-interface Props {
-  cars: Car[];
-}
-
-const CarListPage: React.FC<Props> = ({ cars}) => {
+const CarListPage: React.FC = () => {
+    const cars = React.useContext(CarsContext);
     const [selectedCar, setSelectedCar] = React.useState<Car | null>(null);
     const [open, setOpen] = React.useState(false);
     const [page, setPage] = React.useState(0);
