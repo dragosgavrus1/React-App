@@ -65,11 +65,11 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
     }
 
     return (
-        <div className='car-edit-page' data-testId='car-edit-page'>
+        <div className='car-edit-page' data-testid='car-edit-page'>
             <Typography variant="h3">Edit Car {id}</Typography>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <TextField type="text" data-testId="make-field" value={state.make} label="Make" onChange={(e) => setState(prevState => ({...prevState, make: e.target.value}))} />
+                    <TextField type="text" data-testid="make-field" value={state.make} label="Make" onChange={(e) => setState(prevState => ({...prevState, make: e.target.value}))} />
                 </div>
                 <div>
                     <TextField type="text" value={state.model} label="Model" onChange={(e) => setState(prevState => ({...prevState, model: e.target.value}))} />
@@ -81,7 +81,7 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
                     <TextField type="text" value={state.color} label="Color" onChange={(e) => setState(prevState => ({...prevState, color: e.target.value}))} />
                 </div>
                 <div>
-                    <Button type="submit" data-testId="edit-button">Edit Car</Button>
+                    <Button type="submit" data-testid="edit-button">Edit Car</Button>
                 </div>
                 <RouterLink to="/">
                     <Button>Bact to Home</Button>

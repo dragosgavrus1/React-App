@@ -29,7 +29,7 @@ const CarDetailPage: React.FC = () => {
 
 
     return (
-        <div className='car-detail-page' data-testId='car-detail-page'>
+        <div className='car-detail-page' data-testid='car-detail-page'>
             <Typography variant='h3'>Car Details</Typography>
             {car && (
                 <>

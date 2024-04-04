@@ -81,7 +81,7 @@ const CarListPage: React.FC = () => {
     }));
 
     return (
-        <div className='car-list-page' data-testId='car-list-page'>
+        <div className='car-list-page' data-testid='car-list-page'>
             <Typography variant="h3">List of Cars</Typography>
 
             <TableContainer component={Paper}>
@@ -117,13 +117,15 @@ const CarListPage: React.FC = () => {
                     </TableBody>
                     
                     <TableFooter>
-                        <TablePagination 
+                        <TableRow>
+                            <TablePagination 
                             count={20} 
                             page={page} 
                             onPageChange={handleChangePage} 
                             rowsPerPage={rowsPerPage} 
                             onRowsPerPageChange={handleChangeRowsPerPage}
                             rowsPerPageOptions={[1,5,10]}/>
+                        </TableRow>
                     </TableFooter>
                 </Table>
             </TableContainer>
