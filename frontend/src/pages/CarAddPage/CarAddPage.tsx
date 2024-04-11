@@ -27,18 +27,20 @@ const CarAddPage: React.FC<Props> = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3000/api', state);
-            const newCarData = response.data;
-            const newCar = new Car(newCarData.id, newCarData.make, newCarData.model, newCarData.year, newCarData.color);
-            cars.push(newCar);
-            sortCars();
-            if (setState) {
-                setState({
-                    make: '',
-                    model: '',
-                    year: 0,
-                    color: ''
-                });
+            if(!(state.make === '' || state.model === '' || state.year === 0 || state.color === '')) {
+                const response = await axios.post('http://localhost:3000/api', state);
+                const newCarData = response.data;
+                const newCar = new Car(newCarData.id, newCarData.make, newCarData.model, newCarData.year, newCarData.color);
+                cars.push(newCar);
+                sortCars();
+                if (setState) {
+                    setState({
+                        make: '',
+                        model: '',
+                        year: 0,
+                        color: ''
+                    });
+                }
             }
         }
         catch (error) {

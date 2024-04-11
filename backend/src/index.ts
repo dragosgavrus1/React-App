@@ -97,6 +97,6 @@ module.exports = app;
 // Only start the server if the file is executed directly
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
+    console.log(`Server is running on port http://localhost:${PORT}/api`);
   });
 }

@@ -35,7 +35,7 @@ class CarList {
         let carToAdd = new car_1.default(this.id, car.make, car.model, car.year, car.color);
         this.cars.push(carToAdd);
         this.id++;
-        return car;
+        return carToAdd;
     }
 }
 exports.CarList = CarList;

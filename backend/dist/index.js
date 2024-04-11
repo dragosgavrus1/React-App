@@ -89,6 +89,10 @@ app.delete('/api/:id', (req, res) => {
         res.status(404).json({ message: 'Car not found' });
     }
 });
-app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
-});
+module.exports = app;
+// Only start the server if the file is executed directly
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port http://localhost:${PORT}/api`);
+    });
+}
