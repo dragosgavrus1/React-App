@@ -2,16 +2,30 @@ import express, { Request, Response } from 'express';
 import Car from './models/car'; // Fix the casing of the file name
 import cors from 'cors';
 import { CarList } from './models/controller';
+import http from 'http';
+import { Server } from 'socket.io';
+import { faker } from '@faker-js/faker';
+
 
 const app = express();
 app.use(cors());
+const server = http.createServer(app);
+const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
-
-// Sample data for testing
-const carsController = new CarList();
-
 app.use(express.json());
+
+const carsController = new CarList();
+carsController.initalizeCars();
+
+io.on('connection', (socket) => {
+
+  setInterval(() => {
+    const car: Car = carsController.generateCar();
+    socket.emit('newCar', car);
+  }, 2000);
+});
+
 
 // Get all entities
 app.get('/api', (req: Request, res: Response) => {
@@ -96,7 +110,7 @@ module.exports = app;
 
 // Only start the server if the file is executed directly
 if (require.main === module) {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}/api`);
   });
 }

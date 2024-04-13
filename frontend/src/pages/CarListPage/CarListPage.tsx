@@ -119,7 +119,7 @@ const CarListPage: React.FC = () => {
                     <TableFooter>
                         <TableRow>
                             <TablePagination 
-                            count={20} 
+                            count={cars.length} 
                             page={page} 
                             onPageChange={handleChangePage} 
                             rowsPerPage={rowsPerPage} 

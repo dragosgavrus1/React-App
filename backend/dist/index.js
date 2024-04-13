@@ -6,12 +6,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const controller_1 = require("./models/controller");
+const http_1 = __importDefault(require("http"));
+const socket_io_1 = require("socket.io");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
+const server = http_1.default.createServer(app);
+const io = new socket_io_1.Server(server);
 const PORT = process.env.PORT || 3000;
-// Sample data for testing
-const carsController = new controller_1.CarList();
 app.use(express_1.default.json());
+const carsController = new controller_1.CarList();
+carsController.initalizeCars();
+io.on('connection', (socket) => {
+    setInterval(() => {
+        const car = carsController.generateCar();
+        socket.emit('newCar', car);
+    }, 10000);
+});
 // Get all entities
 app.get('/api', (req, res) => {
     const cars = carsController.cars;
@@ -92,7 +102,7 @@ app.delete('/api/:id', (req, res) => {
 module.exports = app;
 // Only start the server if the file is executed directly
 if (require.main === module) {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`Server is running on port http://localhost:${PORT}/api`);
     });
 }

@@ -7,12 +7,37 @@ import CarAddPage from './pages/CarAddPage/CarAddPage'
 import { createContext, useEffect, useState } from 'react'
 import CarEditPage from './pages/CarEditPage/CarEditPage'
 import axios from 'axios'
+import { io } from 'socket.io-client';
 
 export const CarsContext = createContext<Car[]>([]);
 
 function App() {
-
   const [cars, setCars] = useState<Car[]>([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isServerOnline, setIsServerOnline] = useState(true);
+
+
+  useEffect(() => {
+    const socket = io('http://localhost:3000', { transports : ['websocket'] });
+    // Example of sending a message to the server
+    socket.on('newCar', (newCar: any) => {
+      console.log('Received new car from server:', newCar);
+      const car = new Car(newCar.id, newCar.make, newCar.model, newCar.year, newCar.color);
+      setCars((prevCars) => [...prevCars, car]);
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('online', () => setIsOnline(true));
+    window.addEventListener('offline', () => setIsOnline(false));
+
+    return () => {
+      window.removeEventListener('online', () => setIsOnline(true));
+      window.removeEventListener('offline', () => setIsOnline(false));
+    };
+  }, []);
+
+  
 
   const fetchData = async () => {
     try {
@@ -22,14 +47,21 @@ function App() {
       setCars(carList);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setIsServerOnline(false);
     }
   };
 
   useEffect(() => {
-    // Fetch data from the API when the component mounts
     fetchData();
   }, []);
 
+  if (!isOnline) {
+    return <div>You are currently offline. Please check your internet connection.</div>;
+  }
+
+  if (!isServerOnline) {
+    return <div>The server is currently down. Please try again later.</div>;
+  }
 
   return (
     <CarsContext.Provider value={cars}>
