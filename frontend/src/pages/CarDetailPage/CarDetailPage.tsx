@@ -16,7 +16,8 @@ const CarDetailPage: React.FC = () => {
         const fetchCar = async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/api/${id}`); // Fetch car details from the API
-                const carData: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
+                const responseCar = response.data[0];
+                const carData: Car = new Car(responseCar.id, responseCar.make, responseCar.model, responseCar.year, responseCar.color);
                 setCar(carData);
             } catch (error) {
                 console.error('Error fetching car details:', error);

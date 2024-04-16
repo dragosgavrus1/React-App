@@ -27,7 +27,8 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
         const fetchCar = async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/api/${id}`); // Fetch car details from the API
-                const carData: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
+                const responseCar = response.data[0];
+                const carData: Car = new Car(responseCar.id, responseCar.make, responseCar.model, responseCar.year, responseCar.color);
                 setState({make: carData.getMake(), model: carData.getModel(), year: carData.getYear(), color: carData.getColor()});
                 setCar(carData);
             } catch (error) {
@@ -47,7 +48,6 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
         event.preventDefault();
         try {
             const response = await axios.put(`http://localhost:3000/api/${id}`, state);
-            console.log(response);
             
             const updatedCar: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
             setCar(updatedCar);
