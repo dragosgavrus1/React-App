@@ -20,6 +20,7 @@ const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const CarModel_1 = require("./models/CarModel");
+const CarBrand_1 = require("./models/CarBrand");
 dotenv_1.default.config();
 const PORT = process.env.PORT || 3000;
 const MONGOURI = process.env.MONGOURI || 'mongodb://localhost:27017/CarsDB';
@@ -38,10 +39,10 @@ io.on('connection', (socket) => {
         catch (error) {
             console.error('Error generating and saving car:', error);
         }
-    }), 1000000);
+    }), 10000);
 });
 // Get all entities
-app.get('/api', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/api/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const cars = yield carsController.getCars();
         res.json(cars);
@@ -52,18 +53,14 @@ app.get('/api', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // Get one entity by ID
-app.get('/api/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/api/cars/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
-        console.log(id);
         const car = yield CarModel_1.CarModel.find({ id: id });
-        console.log(car);
-        if (car) {
-            res.json(car);
+        if (car.length === 0) {
+            return res.status(404).json({ message: 'Car not found' });
         }
-        else {
-            res.status(404).json({ message: 'Car not found' });
-        }
+        res.json(car);
     }
     catch (error) {
         console.error('Error getting car by ID:', error);
@@ -71,7 +68,7 @@ app.get('/api/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 }));
 // Create entity
-app.post('/api', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/api/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const car = yield carsController.addCar(req.body);
         res.status(201).json(car);
@@ -82,13 +79,13 @@ app.post('/api', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // Update entity
-app.put('/api/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.put('/api/cars/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const carId = parseInt(req.params.id);
         const { make, model, year, color } = req.body;
         // Find the car by ID
-        const car = yield CarModel_1.CarModel.find({ id: carId });
-        if (!car) {
+        const car = yield CarModel_1.CarModel.findOne({ id: carId });
+        if (car.length === 0) {
             return res.status(404).json({ message: 'Car not found' });
         }
         // Update the car properties
@@ -106,7 +103,7 @@ app.put('/api/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 }));
 // Delete entity
-app.delete('/api/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.delete('/api/cars/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
         // Find the car by ID
@@ -123,17 +120,109 @@ app.delete('/api/:id', (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).json({ message: 'Internal server error' });
     }
 }));
+// Get all brands
+app.get('/api/brands', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const brands = yield CarBrand_1.BrandModel.find({}, { _id: 0, brand_id: 1, brand: 1 });
+        res.json(brands);
+    }
+    catch (error) {
+        console.error('Error getting brands:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+// Get all cars by given brand
+app.get('/api/brands/:name/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const name = req.params.name;
+        const cars = yield CarModel_1.CarModel.find({ make: name }, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
+        if (!cars) {
+            return res.status(404).json({ message: 'Brand not found' });
+        }
+        res.json(cars);
+    }
+    catch (error) {
+        console.error('Error getting cars by brand:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+// Get one brand by ID
+app.get('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const name = req.params.name;
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand: name });
+        if (brand) {
+            res.json(brand);
+        }
+        else {
+            res.status(404).json({ message: 'Brand not found' });
+        }
+    }
+    catch (error) {
+        console.error('Error getting brand by ID:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+// Create brand
+app.post('/api/brands', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const brand = new CarBrand_1.BrandModel(req.body);
+        const savedBrand = yield brand.save();
+        res.status(201).json(savedBrand);
+    }
+    catch (error) {
+        console.error('Error adding brand:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+// Update brand
+app.put('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const brandName = req.params.name;
+        const newBrand = req.body;
+        console.log(newBrand);
+        // Find the brand by ID
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand: brandName });
+        if (!brand) {
+            return res.status(404).json({ message: 'Brand not found' });
+        }
+        // Update the brand properties
+        brand.brand = newBrand.brand;
+        // Save the updated brand to the database
+        yield brand.save();
+        res.json(brand);
+    }
+    catch (error) {
+        console.error('Error updating brand:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+// Delete brand
+app.delete('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const brandName = req.params.name;
+        // Find the brand by ID
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand: brandName });
+        if (!brand) {
+            return res.status(404).json({ message: 'Brand not found' });
+        }
+        // Delete the brand from the database
+        yield brand.deleteOne();
+        res.json({ message: 'Brand deleted successfully' });
+    }
+    catch (error) {
+        console.error('Error deleting brand:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
 module.exports = app;
-// Only start the server if the file is executed directly
-if (require.main === module) {
-    mongoose_1.default.connect(MONGOURI)
-        .then(() => {
-        console.log('Connected to MongoDB');
-        server.listen(PORT, () => {
-            console.log(`Server is running on port http://localhost:${PORT}/api`);
-        });
-    })
-        .catch((error) => {
-        console.error('Error connecting to MongoDB:', error);
+mongoose_1.default.connect(MONGOURI)
+    .then(() => {
+    console.log('Connected to MongoDB');
+    server.listen(PORT, () => {
+        console.log(`Server is running on port http://localhost:${PORT}/api`);
     });
-}
+})
+    .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+});

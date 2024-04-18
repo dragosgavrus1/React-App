@@ -14,7 +14,7 @@ export class CarList {
     const savedCar = await newCar.save();
 
     return savedCar;
-}
+  }
 
 
   public async generateAndSaveCar(): Promise<ICar> {

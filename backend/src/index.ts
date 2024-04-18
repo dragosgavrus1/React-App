@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { ICar, CarModel } from './models/CarModel';
+import { IBrand, BrandModel } from './models/CarBrand';
 
 
 dotenv.config();
@@ -31,12 +32,12 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Error generating and saving car:', error);
     }
-  }, 1000000);
+  }, 10000);
 });
 
 
 // Get all entities
-app.get('/api', async (req: Request, res: Response) => {
+app.get('/api/cars', async (req: Request, res: Response) => {
   try {
     const cars = await carsController.getCars();
     res.json(cars);
@@ -48,15 +49,14 @@ app.get('/api', async (req: Request, res: Response) => {
 
 
 // Get one entity by ID
-app.get('/api/:id', async (req: Request, res: Response) => {
+app.get('/api/cars/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const car = await CarModel.find({id : id});
-    if (car) {
-      res.json(car);
-    } else {
-      res.status(404).json({ message: 'Car not found' });
+    if (car.length === 0) {
+      return res.status(404).json({ message: 'Car not found' });
     }
+    res.json(car);
   } catch (error) {
     console.error('Error getting car by ID:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -65,7 +65,7 @@ app.get('/api/:id', async (req: Request, res: Response) => {
 
 
 // Create entity
-app.post('/api', async (req: Request, res: Response) => {
+app.post('/api/cars', async (req: Request, res: Response) => {
   try {
     const car = await carsController.addCar(req.body);
     res.status(201).json(car);
@@ -76,14 +76,14 @@ app.post('/api', async (req: Request, res: Response) => {
 });
 
 // Update entity
-app.put('/api/:id', async (req: Request, res: Response) => {
+app.put('/api/cars/:id', async (req: Request, res: Response) => {
   try {
     const carId = parseInt(req.params.id);
     const { make, model, year, color } = req.body;
 
     // Find the car by ID
-    const car: any = await CarModel.find({id : carId});
-    if (!car) {
+    const car: any = await CarModel.findOne({ id: carId });
+    if (car.length === 0) {
       return res.status(404).json({ message: 'Car not found' });
     }
 
@@ -104,7 +104,7 @@ app.put('/api/:id', async (req: Request, res: Response) => {
 });
 
 // Delete entity
-app.delete('/api/:id', async (req: Request, res: Response) => {
+app.delete('/api/cars/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -124,20 +124,116 @@ app.delete('/api/:id', async (req: Request, res: Response) => {
   }
 });
 
+// Get all brands
+app.get('/api/brands', async (req: Request, res: Response) => {
+  try {
+    const brands = await BrandModel.find({}, { _id: 0, brand_id: 1, brand: 1 });
+    res.json(brands);
+  } catch (error) {
+    console.error('Error getting brands:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all cars by given brand
+app.get('/api/brands/:name/cars', async (req: Request, res: Response) => {
+  try {
+    const name = req.params.name;
+    const cars = await CarModel.find({make : name}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
+    if (!cars) {
+      return res.status(404).json({ message: 'Brand not found' });
+    }
+    res.json(cars);
+  } catch (error) {
+    console.error('Error getting cars by brand:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get one brand by ID
+app.get('/api/brands/:name', async (req: Request, res: Response) => {
+  try {
+    const name = req.params.name;
+    const brand = await BrandModel.findOne({brand : name});
+    if (brand) {
+      res.json(brand);
+    } else {
+      res.status(404).json({ message: 'Brand not found' });
+    }
+  } catch (error) {
+    console.error('Error getting brand by ID:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Create brand
+app.post('/api/brands', async (req: Request, res: Response) => {
+  try {
+    const brand = new BrandModel(req.body);
+    const savedBrand = await brand.save();
+    res.status(201).json(savedBrand);
+  } catch (error) {
+    console.error('Error adding brand:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update brand
+app.put('/api/brands/:name', async (req: Request, res: Response) => {
+  try {
+    const brandName = req.params.name;
+    const newBrand  = req.body;
+    // Find the brand by ID
+    const brand: any = await BrandModel.findOne({brand : brandName});
+    if (!brand) {
+      return res.status(404).json({ message: 'Brand not found' });
+    }
+
+    // Update the brand properties
+    brand.brand = newBrand.brand;
+
+    // Save the updated brand to the database
+    await brand.save();
+
+    res.json(brand);
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete brand
+app.delete('/api/brands/:name', async (req: Request, res: Response) => {
+  try {
+    const brandName = req.params.name;
+
+    // Find the brand by ID
+    const brand = await BrandModel.findOne({brand : brandName});
+    if (!brand) {
+      return res.status(404).json({ message: 'Brand not found' });
+    }
+
+    // Delete the brand from the database
+    await brand.deleteOne();
+
+    res.json({ message: 'Brand deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting brand:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 module.exports = app;
 
-
-
-// Only start the server if the file is executed directly
-if (require.main === module) {
-  mongoose.connect(MONGOURI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    server.listen(PORT, () => {
-      console.log(`Server is running on port http://localhost:${PORT}/api`);
-    });
-  })
-  .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
+mongoose.connect(MONGOURI)
+.then(() => {
+  console.log('Connected to MongoDB');
+  server.listen(PORT, () => {
+    console.log(`Server is running on port http://localhost:${PORT}/api`);
   });
-}
+})
+.catch((error) => {
+  console.error('Error connecting to MongoDB:', error);
+});
+
