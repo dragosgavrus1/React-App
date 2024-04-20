@@ -88,6 +88,10 @@ app.put('/api/cars/:id', (req, res) => __awaiter(void 0, void 0, void 0, functio
         if (car.length === 0) {
             return res.status(404).json({ message: 'Car not found' });
         }
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand: make });
+        if (!brand) {
+            res.status(404).json({ message: 'Brand not found' });
+        }
         // Update the car properties
         car.make = make;
         car.model = model;
@@ -180,7 +184,6 @@ app.put('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, fun
     try {
         const brandName = req.params.name;
         const newBrand = req.body;
-        console.log(newBrand);
         // Find the brand by ID
         const brand = yield CarBrand_1.BrandModel.findOne({ brand: brandName });
         if (!brand) {

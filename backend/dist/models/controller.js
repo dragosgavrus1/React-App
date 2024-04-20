@@ -12,9 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CarList = void 0;
 const faker_1 = require("@faker-js/faker");
 const CarModel_1 = require("./CarModel");
+const CarBrand_1 = require("./CarBrand");
 class CarList {
     addCar(carData) {
         return __awaiter(this, void 0, void 0, function* () {
+            const brand = yield CarBrand_1.BrandModel.findOne({ brand: carData.make });
+            if (!brand) {
+                throw new Error('Brand not found');
+            }
             // Create a new CarModel instance with the provided car data
             const newCar = new CarModel_1.CarModel(carData);
             // Save the new car to the database

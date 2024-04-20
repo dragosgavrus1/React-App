@@ -95,6 +95,7 @@ describe('Test API endpoints', () => {
     const res = await request(app).put(`/api/brands/${testBrandName}`).send(updatedBrand);
     expect(res.statusCode).toEqual(200);
     expect(res.body.brand).toEqual('TestBrand1');
+    testBrandName = 'TestBrand1';
   });
 
   it('should delete a brand', async () => {

@@ -2,11 +2,16 @@ import { Request, Response } from 'express';
 import  Car from './car';
 import { faker } from '@faker-js/faker';
 import {CarModel, ICar}  from './CarModel';
+import { BrandModel } from './CarBrand';
 
 
 export class CarList {
 
   public async addCar(carData: any): Promise<ICar> {
+    const brand = await BrandModel.findOne({brand : carData.make});
+    if (!brand) {
+      throw new Error('Brand not found');
+    }
     // Create a new CarModel instance with the provided car data
     const newCar = new CarModel(carData);
 

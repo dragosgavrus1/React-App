@@ -87,6 +87,11 @@ app.put('/api/cars/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Car not found' });
     }
 
+    const brand = await BrandModel.findOne({brand : make});
+    if (!brand) {
+      res.status(404).json({ message: 'Brand not found' });
+    }
+
     // Update the car properties
     car.make = make;
     car.model = model;
