@@ -47,7 +47,7 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:3000/api/${id}`, state);
+            const response = await axios.put(`http://localhost:3000/api/cars/${id}`, state);
             
             const updatedCar: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
             setCar(updatedCar);

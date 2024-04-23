@@ -49,7 +49,7 @@ const CarListPage: React.FC = () => {
         try {
             if (selectedCar) {
                 // Make a DELETE request to the backend API to delete the selected car
-                await axios.delete(`http://localhost:3000/api/${selectedCar.getId()}`);
+                await axios.delete(`http://localhost:3000/api/cars/${selectedCar.getId()}`);
                 
                 cars.splice(cars.indexOf(selectedCar), 1);
             }

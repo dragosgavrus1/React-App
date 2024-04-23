@@ -41,7 +41,7 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api');
+      const response = await axios.get('http://localhost:3000/api/cars');
       const carList = response.data.map((carData: any) => new Car(carData.id, carData.make, carData.model, carData.year, carData.color));
       console.log(cars);
       setCars(carList);

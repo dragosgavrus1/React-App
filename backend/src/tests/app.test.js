@@ -5,7 +5,7 @@ const e = require('express');
 
 describe('Test API endpoints', () => {
   let testCarId;
-  let testBrandName;
+  let testBrandId;
 
   it('should get all cars', async () => {
     const res = await request(app).get('/api/cars');
@@ -78,12 +78,12 @@ describe('Test API endpoints', () => {
     };
     const res = await request(app).post('/api/brands').send(newBrand);
     expect(res.statusCode).toEqual(201);
-    expect(res.body).toHaveProperty('brand');
-    testBrandName = res.body.brand; // Save the ID for later use in other tests
+    expect(res.body).toHaveProperty('brand_id');
+    testBrandId = res.body.brand_id; // Save the ID for later use in other tests
   });
 
   it('should get a specific brand by name', async () => {
-    const res = await request(app).get(`/api/brands/${testBrandName}`);
+    const res = await request(app).get(`/api/brands/${testBrandId}`);
     expect(res.statusCode).toEqual(200);
     expect(res.body.brand).toEqual('TestBrand');
   });
@@ -92,14 +92,13 @@ describe('Test API endpoints', () => {
     const updatedBrand = {
       brand: 'TestBrand1',
     };
-    const res = await request(app).put(`/api/brands/${testBrandName}`).send(updatedBrand);
+    const res = await request(app).put(`/api/brands/${testBrandId}`).send(updatedBrand);
     expect(res.statusCode).toEqual(200);
     expect(res.body.brand).toEqual('TestBrand1');
-    testBrandName = 'TestBrand1';
   });
 
   it('should delete a brand', async () => {
-    const res = await request(app).delete(`/api/brands/${testBrandName}`);
+    const res = await request(app).delete(`/api/brands/${testBrandId}`);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('message', 'Brand deleted successfully');
   });
@@ -112,7 +111,7 @@ describe('Test API endpoints', () => {
   });
 
   it('should get all cars by a given brand', async () => {
-    const res = await request(app).get(`/api/brands/Toyota/cars`);
+    const res = await request(app).get(`/api/brands/1/cars`);
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true); // Check if response is an array
   });

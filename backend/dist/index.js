@@ -136,12 +136,16 @@ app.get('/api/brands', (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 }));
 // Get all cars by given brand
-app.get('/api/brands/:name/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/api/brands/:id/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const name = req.params.name;
-        const cars = yield CarModel_1.CarModel.find({ make: name }, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
-        if (!cars) {
+        const brand_id = req.params.id;
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand_id: brand_id });
+        if (!brand) {
             return res.status(404).json({ message: 'Brand not found' });
+        }
+        const cars = yield CarModel_1.CarModel.find({ make: brand.brand }, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
+        if (!cars) {
+            return res.status(404).json({ message: 'No cars found' });
         }
         res.json(cars);
     }
@@ -151,10 +155,10 @@ app.get('/api/brands/:name/cars', (req, res) => __awaiter(void 0, void 0, void 0
     }
 }));
 // Get one brand by ID
-app.get('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/api/brands/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const name = req.params.name;
-        const brand = yield CarBrand_1.BrandModel.findOne({ brand: name });
+        const brand_id = req.params.id;
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand_id: brand_id });
         if (brand) {
             res.json(brand);
         }
@@ -180,12 +184,12 @@ app.post('/api/brands', (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 }));
 // Update brand
-app.put('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.put('/api/brands/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const brandName = req.params.name;
+        const brand_id = req.params.id;
         const newBrand = req.body;
         // Find the brand by ID
-        const brand = yield CarBrand_1.BrandModel.findOne({ brand: brandName });
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand_id: brand_id });
         if (!brand) {
             return res.status(404).json({ message: 'Brand not found' });
         }
@@ -201,11 +205,11 @@ app.put('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 }));
 // Delete brand
-app.delete('/api/brands/:name', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.delete('/api/brands/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const brandName = req.params.name;
+        const brand_id = req.params.id;
         // Find the brand by ID
-        const brand = yield CarBrand_1.BrandModel.findOne({ brand: brandName });
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand_id: brand_id });
         if (!brand) {
             return res.status(404).json({ message: 'Brand not found' });
         }

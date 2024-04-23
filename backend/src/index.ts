@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Error generating and saving car:', error);
     }
-  }, 10000);
+  }, 30000);
 });
 
 
@@ -141,12 +141,16 @@ app.get('/api/brands', async (req: Request, res: Response) => {
 });
 
 // Get all cars by given brand
-app.get('/api/brands/:name/cars', async (req: Request, res: Response) => {
+app.get('/api/brands/:id/cars', async (req: Request, res: Response) => {
   try {
-    const name = req.params.name;
-    const cars = await CarModel.find({make : name}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
-    if (!cars) {
+    const brand_id = req.params.id;
+    const brand = await BrandModel.findOne({brand_id : brand_id});
+    if (!brand) {
       return res.status(404).json({ message: 'Brand not found' });
+    }
+    const cars = await CarModel.find({make : brand.brand}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
+    if (!cars) {
+      return res.status(404).json({ message: 'No cars found' });
     }
     res.json(cars);
   } catch (error) {
@@ -156,10 +160,10 @@ app.get('/api/brands/:name/cars', async (req: Request, res: Response) => {
 });
 
 // Get one brand by ID
-app.get('/api/brands/:name', async (req: Request, res: Response) => {
+app.get('/api/brands/:id', async (req: Request, res: Response) => {
   try {
-    const name = req.params.name;
-    const brand = await BrandModel.findOne({brand : name});
+    const brand_id = req.params.id;
+    const brand = await BrandModel.findOne({brand_id : brand_id});
     if (brand) {
       res.json(brand);
     } else {
@@ -184,12 +188,12 @@ app.post('/api/brands', async (req: Request, res: Response) => {
 });
 
 // Update brand
-app.put('/api/brands/:name', async (req: Request, res: Response) => {
+app.put('/api/brands/:id', async (req: Request, res: Response) => {
   try {
-    const brandName = req.params.name;
+    const brand_id = req.params.id;
     const newBrand  = req.body;
     // Find the brand by ID
-    const brand: any = await BrandModel.findOne({brand : brandName});
+    const brand: any = await BrandModel.findOne({brand_id : brand_id});
     if (!brand) {
       return res.status(404).json({ message: 'Brand not found' });
     }
@@ -208,12 +212,12 @@ app.put('/api/brands/:name', async (req: Request, res: Response) => {
 });
 
 // Delete brand
-app.delete('/api/brands/:name', async (req: Request, res: Response) => {
+app.delete('/api/brands/:id', async (req: Request, res: Response) => {
   try {
-    const brandName = req.params.name;
+    const brand_id = req.params.id;
 
     // Find the brand by ID
-    const brand = await BrandModel.findOne({brand : brandName});
+    const brand = await BrandModel.findOne({brand_id : brand_id});
     if (!brand) {
       return res.status(404).json({ message: 'Brand not found' });
     }
