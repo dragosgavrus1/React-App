@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import Car from '../../models/car';
 import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
-import { Button, TextField, Typography } from '@mui/material';
+import { Button, MenuItem, TextField, Typography } from '@mui/material';
 import './CarEditPage.css';
-import { CarsContext } from '../../App';
+import { BrandsContext, CarsContext, ServerStatusContext } from '../../App';
 import axios from 'axios';
 
 interface Props {
@@ -14,6 +14,8 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
 
     const navigate = useNavigate();
     const cars = React.useContext(CarsContext);
+    const brands = React.useContext(BrandsContext);
+    const isServerOnline = React.useContext(ServerStatusContext);
     const { id } = useParams<{ id: string }>(); // Get the ID from the URL params
     const [car, setCar] = React.useState<Car | null>(null);
     const [state, setState] = React.useState({
@@ -25,19 +27,29 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
 
     useEffect(() => {
         const fetchCar = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3000/api/${id}`); // Fetch car details from the API
+            if(isServerOnline){
+                try {
+                const response = await axios.get(`http://localhost:3000/api/cars/${id}`); // Fetch car details from the API
                 const responseCar = response.data[0];
                 const carData: Car = new Car(responseCar.id, responseCar.make, responseCar.model, responseCar.year, responseCar.color);
                 setState({make: carData.getMake(), model: carData.getModel(), year: carData.getYear(), color: carData.getColor()});
                 setCar(carData);
-            } catch (error) {
-                console.error('Error fetching car details:', error);
+                } catch (error) {
+                    console.error('Error fetching car details:', error);
+                }
             }
+            else {
+                const car = cars.find(car => car.getId() === parseInt(id ?? ""));
+                if (car) {
+                    setState({ make: car.getMake(), model: car.getModel(), year: car.getYear(), color: car.getColor() });
+                    setCar(car);
+                }
+            }
+            
         };
 
-        fetchCar(); // Call the fetchCar function when the component mounts
-    }, [id]); // Include id in the dependency array to re-fetch car details when id changes
+        fetchCar();
+    }, [id]); 
 
 
     const sortCars = () =>{
@@ -46,7 +58,8 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        try {
+        if(isServerOnline){
+            try {
             const response = await axios.put(`http://localhost:3000/api/cars/${id}`, state);
             
             const updatedCar: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
@@ -58,10 +71,29 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
 
             sortCars();
             navigate('/');
+            }
+            catch (error) {
+                console.error('Error updating car:', error);
+            }
         }
-        catch (error) {
-            console.error('Error updating car:', error);
+        else{
+            const pendingApiCalls = JSON.parse(localStorage.getItem('pendingApiCalls') || '[]');
+            pendingApiCalls.push({
+                method: 'PUT',
+                url: 'http://localhost:3000/api/cars/' + id,
+                data: state
+            });
+            localStorage.setItem('pendingApiCalls', JSON.stringify(pendingApiCalls));
+            const updatedCar: Car = new Car(car?.getId() ?? 0, state.make, state.model, state.year, state.color);
+            setCar(updatedCar);
+
+            const updatedCars = cars.map(car => car.getId() === updatedCar.getId() ? updatedCar : car);
+            setCars(updatedCars);
+
+            sortCars();
+            navigate('/');
         }
+        
     }
 
     return (
@@ -69,7 +101,19 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
             <Typography variant="h3">Edit Car {id}</Typography>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <TextField type="text" data-testid="make-field" value={state.make} label="Make" onChange={(e) => setState(prevState => ({...prevState, make: e.target.value}))} />
+                    <TextField
+                        select
+                        value={state.make}
+                        data-testid="make-field"
+                        label="Make"
+                        onChange={(e) => setState(prevState => ({...prevState, make: e.target.value}))}
+                    >
+                        {brands.map((brand) => (
+                            <MenuItem key={brand.brand_id} value={brand.brand}>
+                                {brand.brand}
+                            </MenuItem>
+                        ))}
+                    </TextField>
                 </div>
                 <div>
                     <TextField type="text" value={state.model} label="Model" onChange={(e) => setState(prevState => ({...prevState, model: e.target.value}))} />

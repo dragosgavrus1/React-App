@@ -31,7 +31,9 @@ const io = new socket_io_1.Server(server);
 app.use(express_1.default.json());
 const carsController = new controller_1.CarList();
 io.on('connection', (socket) => {
-    setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('A client connected');
+    // Start emitting events only for this connected client
+    const interval = setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const car = yield carsController.generateAndSaveCar();
             socket.emit('newCar', car);
@@ -39,12 +41,27 @@ io.on('connection', (socket) => {
         catch (error) {
             console.error('Error generating and saving car:', error);
         }
-    }), 10000);
+    }), 30000);
+    // Stop emitting events when the client disconnects
+    socket.on('disconnect', () => {
+        console.log('A client disconnected');
+        clearInterval(interval);
+    });
 });
+// app.get('/api/cars/updates', async (req, res) => {
+//   try {
+//     const car = await carsController.generateAndSaveCar();
+//     res.json(car);
+//   } catch (error) {
+//     console.error('Error generating and saving car:', error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
 // Get all entities
 app.get('/api/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const cars = yield carsController.getCars();
+        const page = parseInt(req.query.page);
+        const cars = yield carsController.getCars(page);
         res.json(cars);
     }
     catch (error) {
@@ -124,10 +141,14 @@ app.delete('/api/cars/:id', (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(500).json({ message: 'Internal server error' });
     }
 }));
-// Get all brands
 app.get('/api/brands', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const brands = yield CarBrand_1.BrandModel.find({}, { _id: 0, brand_id: 1, brand: 1 });
+        const itemsPerPage = 50; // Number of brands per page
+        let page = parseInt(req.query.page) || 0; // Default to page 1 if page query parameter is not provided
+        const skip = page * itemsPerPage; // Calculate the number of brands to skip
+        const brands = yield CarBrand_1.BrandModel.find({}, { _id: 0, brand_id: 1, brand: 1 })
+            .skip(skip)
+            .limit(itemsPerPage);
         res.json(brands);
     }
     catch (error) {
@@ -174,6 +195,9 @@ app.get('/api/brands/:id', (req, res) => __awaiter(void 0, void 0, void 0, funct
 // Create brand
 app.post('/api/brands', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        if (yield CarBrand_1.BrandModel.findOne({ brand: req.body.brand })) {
+            return res.status(400).json({ message: 'Brand already exists' });
+        }
         const brand = new CarBrand_1.BrandModel(req.body);
         const savedBrand = yield brand.save();
         res.status(201).json(savedBrand);
@@ -224,12 +248,14 @@ app.delete('/api/brands/:id', (req, res) => __awaiter(void 0, void 0, void 0, fu
 }));
 module.exports = app;
 mongoose_1.default.connect(MONGOURI)
-    .then(() => {
+    .then(() => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Connected to MongoDB');
+    // Script to generate cars
+    // Start the server after generating cars
     server.listen(PORT, () => {
         console.log(`Server is running on port http://localhost:${PORT}/api`);
     });
-})
+}))
     .catch((error) => {
     console.error('Error connecting to MongoDB:', error);
 });

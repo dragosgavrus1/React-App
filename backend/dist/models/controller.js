@@ -29,9 +29,14 @@ class CarList {
     }
     generateAndSaveCar() {
         return __awaiter(this, void 0, void 0, function* () {
-            // Generate car data using Faker
+            let randomBrand = Math.floor(Math.random() * 999950);
+            let brand = yield CarBrand_1.BrandModel.findOne({ brand_id: randomBrand });
+            while (!brand) {
+                randomBrand = Math.floor(Math.random() * 999950);
+                brand = yield CarBrand_1.BrandModel.findOne({ brand_id: randomBrand });
+            }
             const carData = {
-                make: faker_1.faker.vehicle.manufacturer(),
+                make: brand.brand,
                 model: faker_1.faker.vehicle.model(),
                 year: faker_1.faker.date.past().getFullYear(),
                 color: faker_1.faker.vehicle.color(),
@@ -43,11 +48,15 @@ class CarList {
             return savedCar;
         });
     }
-    getCars() {
+    getCars(page) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const pageSize = 50;
+                const skip = page * pageSize;
                 // Retrieve only the required fields from the database
-                const cars = yield CarModel_1.CarModel.find({}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
+                const cars = yield CarModel_1.CarModel.find({}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 })
+                    .skip(skip)
+                    .limit(pageSize);
                 // Return the retrieved documents
                 return cars;
             }

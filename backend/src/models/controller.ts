@@ -23,14 +23,20 @@ export class CarList {
 
 
   public async generateAndSaveCar(): Promise<ICar> {
-    // Generate car data using Faker
-    const carData = {
-        make: faker.vehicle.manufacturer(),
-        model: faker.vehicle.model(),
-        year: faker.date.past().getFullYear(),
-        color: faker.vehicle.color(),
-    };
 
+    let randomBrand = Math.floor(Math.random() * 999950);
+    let brand = await BrandModel.findOne({brand_id : randomBrand});
+    while (!brand) {
+      randomBrand = Math.floor(Math.random() * 999950);
+      brand = await BrandModel.findOne({brand_id : randomBrand});
+    }
+    const carData = {
+      make: brand.brand,
+      model: faker.vehicle.model(),
+      year: faker.date.past().getFullYear(),
+      color: faker.vehicle.color(),
+    };
+    
     // Save the generated car to the database
     const newCar = new CarModel(carData);
 
@@ -41,16 +47,22 @@ export class CarList {
   }
 
 
-  public async getCars(): Promise<any[]> {
+  public async getCars(page: number): Promise<any[]> {
     try {
-        // Retrieve only the required fields from the database
-        const cars = await CarModel.find({}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 });
-
-        // Return the retrieved documents
-        return cars;
+      const pageSize = 50;
+      const skip = page * pageSize;
+  
+      // Retrieve only the required fields from the database
+      const cars = await CarModel.find({}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 })
+                                  .skip(skip)
+                                  .limit(pageSize);
+  
+      // Return the retrieved documents
+      return cars;
     } catch (error) {
-        console.error('Error getting cars:', error);
-        return [];
+      console.error('Error getting cars:', error);
+      return [];
     }
-}
+  }
+  
 }

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Car from '../../models/car';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import './CarDetailPage.css';
 import { Typography, Link, Button } from '@mui/material';
 import axios from 'axios';
+import { CarsContext, ServerStatusContext } from '../../App';
 
 
 
@@ -11,16 +12,26 @@ const CarDetailPage: React.FC = () => {
 
     const { id } = useParams<{ id: string }>(); // Get the ID from the URL params
     const [car, setCar] = useState<Car | null>(null); // State to store car data
+    const isServerOnline = useContext(ServerStatusContext);
+    const cars = useContext(CarsContext);
 
     useEffect(() => {
         const fetchCar = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3000/api/cars/${id}`); // Fetch car details from the API
-                const responseCar = response.data[0];
-                const carData: Car = new Car(responseCar.id, responseCar.make, responseCar.model, responseCar.year, responseCar.color);
-                setCar(carData);
-            } catch (error) {
-                console.error('Error fetching car details:', error);
+            if (isServerOnline) {
+                try {
+                    const response = await axios.get(`http://localhost:3000/api/cars/${id}`); // Fetch car details from the API
+                    const responseCar = response.data[0];
+                    const carData: Car = new Car(responseCar.id, responseCar.make, responseCar.model, responseCar.year, responseCar.color);
+                    setCar(carData);
+                } catch (error) {
+                    console.error('Error fetching car details:', error);
+                }
+            }
+            else {
+                const car = cars.find(car => car.getId() === parseInt(id || '', 10));
+                if (car) {
+                    setCar(car);
+                }
             }
         };
 

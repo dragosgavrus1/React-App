@@ -1,36 +1,79 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Car from '../../models/car';
 import { Link as RouterLink } from 'react-router-dom';
 import './CarListPage.css';
-import {  Typography , Link, Table, TableContainer, Paper, TableHead, TableBody, TableRow, TableCell, Button, Dialog, TablePagination, TableFooter} from '@mui/material';
+import {  Typography , Link, Table, TableContainer, Paper, TableHead, TableBody, TableRow, TableCell, Button, Dialog} from '@mui/material';
 import { DialogActions, DialogContentText, DialogContent, IconButton} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PieChart } from '@mui/x-charts';
-import { CarsContext } from '../../App';
+import { CarsContext, ServerStatusContext } from '../../App';
 import axios from 'axios';
 
+interface Props {
+    setCars: React.Dispatch<React.SetStateAction<Car[]>>;
+}
+    
 
-const CarListPage: React.FC = () => {
-    const cars = React.useContext(CarsContext);
+const CarListPage: React.FC<Props> = ({ setCars }) => {
+    const carsContext = React.useContext(CarsContext);
+    const isServerOnline = React.useContext(ServerStatusContext);
     const [selectedCar, setSelectedCar] = React.useState<Car | null>(null);
     const [open, setOpen] = React.useState(false);
     const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const bottomBoundaryRef = React.useRef<HTMLTableRowElement>(null);
 
-    const handleChangePage = (
-        _event: React.MouseEvent<HTMLButtonElement> | null,
-        newPage: number,
-    ) => {
-        setPage(newPage);
-    };
 
-    const handleChangeRowsPerPage = (
-        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
-    };
+    
+    useEffect(() => {
+        const handleScroll = () => {
+            if (
+                bottomBoundaryRef.current &&
+                bottomBoundaryRef.current.getBoundingClientRect().bottom <= window.innerHeight
+            ) {
+                loadMoreCars();
+            }
+        };
+    
+        // Debounce function to prevent multiple rapid calls
+        const debounce = (func: any, delay: number) => {
+            let timer: ReturnType<typeof setTimeout>;
+            return function (this: any) {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => func.apply(context, args), delay);
+            };
+        };
+    
+        const debouncedScrollHandler = debounce(handleScroll, 1000); // Adjust the delay as needed
+    
+        window.addEventListener('scroll', debouncedScrollHandler);
+        return () => window.removeEventListener('scroll', debouncedScrollHandler);
+    }, [page]);
+    
+    const [fetchedCarIds, setFetchedCarIds] = React.useState<number[]>([]);
+
+    const loadMoreCars = async () => {
+        try {
+            const nextPage = page + 1; // Increment page number for the next page
+
+            const response = await axios.get(`http://localhost:3000/api/cars?page=${nextPage}`);
+            const newCars = response.data.map((carData: any) => new Car(carData.id, carData.make, carData.model, carData.year, carData.color));
+
+            // Filter out the cars that are already present in the state
+            const filteredNewCars = newCars.filter((car: Car) => !fetchedCarIds.includes(car.getId()));
+
+            // Update the state with new cars
+            setCars((prevCars) => [...prevCars, ...filteredNewCars]);
+            setFetchedCarIds((prevIds) => [...prevIds, ...filteredNewCars.map((car:Car) => car.getId())]);
+            // Update the global state of the page number
+            setPage(nextPage);
+        } catch (error) {
+          console.error('Error fetching next page of cars:', error);
+        }
+      };
+      
 
     const handleCarClick = (car: Car) => {
         setSelectedCar(car);
@@ -48,10 +91,24 @@ const CarListPage: React.FC = () => {
     const handleDelete = async () => {
         try {
             if (selectedCar) {
-                // Make a DELETE request to the backend API to delete the selected car
-                await axios.delete(`http://localhost:3000/api/cars/${selectedCar.getId()}`);
+                if(isServerOnline){
+                    // Make a DELETE request to the backend API to delete the selected car
+                    await axios.delete(`http://localhost:3000/api/cars/${selectedCar.getId()}`);
+                }
+                else{
+                    const pendingApiCalls = JSON.parse(localStorage.getItem('pendingApiCalls') || '[]');
+      
+                    // Add the new pending API call to the array
+                    pendingApiCalls.push({
+                    method: 'DELETE',
+                    url: 'http://localhost:3000/api/cars/' + selectedCar.getId(),
+                    });
                 
-                cars.splice(cars.indexOf(selectedCar), 1);
+                    // Save the updated array back to localStorage
+                    localStorage.setItem('pendingApiCalls', JSON.stringify(pendingApiCalls));
+                }
+                
+                carsContext.splice(carsContext.indexOf(selectedCar), 1);
             }
             setOpen(false);
         } catch (error) {
@@ -60,11 +117,11 @@ const CarListPage: React.FC = () => {
     }
 
     const sortCars = () =>{
-        cars.sort((a, b) => a.getMake().localeCompare(b.getMake()));
+        carsContext.sort((a, b) => a.getMake().localeCompare(b.getMake()));
     }
     sortCars();
 
-    const chartData = cars.reduce((acc: { [key: string]: number }, car) => {
+    const chartData = carsContext.reduce((acc: { [key: string]: number }, car) => {
         const make = car.getMake();
         if (acc[make]) {
             acc[make] += 1;
@@ -84,6 +141,39 @@ const CarListPage: React.FC = () => {
         <div className='car-list-page' data-testid='car-list-page'>
             <Typography variant="h3">List of Cars</Typography>
 
+            <PieChart 
+                    series={[
+                        {
+                        data: pieChartData,
+                        },
+                    ]} width={300} 
+                    height={200}
+                    slotProps={{
+                        legend: {
+                            hidden: true,
+                        },
+                    }}
+            />
+
+            <div>
+                <Link component={RouterLink} to="/brands">
+                    <Button className='MuiButton normal-button'>View Brands</Button>
+                </Link>
+            </div>
+
+            <div>
+                <Link component={RouterLink} to="/add">
+                    <Button className='MuiButton normal-button'>Add Car</Button>
+                </Link>
+            </div>
+
+            
+            {selectedCar && (
+                <Link component={RouterLink} to={`/car/${selectedCar.getId()}`}>
+                    <Button className='MuiButton normal-button'>View Details</Button>
+                </Link>
+            )}
+
             <TableContainer component={Paper}>
                 <Table aria-label="sticky table">
 
@@ -97,9 +187,9 @@ const CarListPage: React.FC = () => {
                     </TableHead>
 
                     <TableBody>
-                        {(cars.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                        ).map((car) => (
-                            <TableRow key={car.getId()} onClick={() => handleCarClick(car)} selected={selectedCar===car} hover>
+                        {carsContext.map((car,index) => (
+                            <TableRow key={car.getId()} onClick={() => handleCarClick(car)} selected={selectedCar===car} hover
+                            ref={index === carsContext.length - 1 ? bottomBoundaryRef : null}>
                                 <TableCell>{car.getMake()}</TableCell>
                                 <TableCell>{car.getModel()}</TableCell>
                                 <TableCell>{car.getYear()}</TableCell>
@@ -116,34 +206,12 @@ const CarListPage: React.FC = () => {
                         )}
                     </TableBody>
                     
-                    <TableFooter>
-                        <TableRow>
-                            <TablePagination 
-                            count={cars.length} 
-                            page={page} 
-                            onPageChange={handleChangePage} 
-                            rowsPerPage={rowsPerPage} 
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                            rowsPerPageOptions={[1,5,10]}/>
-                        </TableRow>
-                    </TableFooter>
+                    =
                 </Table>
             </TableContainer>
 
             
-            <PieChart 
-                    series={[
-                        {
-                        data: pieChartData,
-                        },
-                    ]} width={300} 
-                    height={200}
-                    slotProps={{
-                        legend: {
-                            hidden: true,
-                        },
-                    }}
-                /> 
+            
             
             <Dialog open={open} onClose={handleClose}>
                 <DialogContent>
@@ -157,18 +225,7 @@ const CarListPage: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            <div>
-                <Link component={RouterLink} to="/add">
-                    <Button className='MuiButton normal-button'>Add Car</Button>
-                </Link>
-            </div>
             
-
-            {selectedCar && (
-                <Link component={RouterLink} to={`/car/${selectedCar.getId()}`}>
-                    <Button className='MuiButton normal-button'>View Details</Button>
-                </Link>
-            )}
         
         </div>
     );
