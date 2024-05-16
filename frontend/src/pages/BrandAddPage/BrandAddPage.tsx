@@ -14,7 +14,7 @@ const BrandAddPage: React.FC = () => {
         const pendingApiCalls = JSON.parse(localStorage.getItem('pendingApiCalls') || '[]');
         pendingApiCalls.push({
             method: 'POST',
-            url: 'http://localhost:3000/api/brands',
+            url: 'http://16.170.236.247:3000/api/brands',
             data: { brand: brandName }
         });
         localStorage.setItem('pendingApiCalls', JSON.stringify(pendingApiCalls));
@@ -29,7 +29,7 @@ const BrandAddPage: React.FC = () => {
                     brands.push({ brand_id: 0, brand: brand });
                     setBrand('');
                 } else {
-                    const response = await axios.post('http://localhost:3000/api/brands', { brand: brand });
+                    const response = await axios.post('http://16.170.236.247:3000/api/brands', { brand: brand });
                     response.data.brand_id = response.data.id;
                     brands.push(response.data);
 

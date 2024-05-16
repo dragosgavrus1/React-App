@@ -69,7 +69,7 @@ const BrandListPage: React.FC<Props> = ({setBrands}) => {
 
   const fetchCars = async (brandId: number) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/brands/${brandId}/cars`);
+      const response = await axios.get(`http://16.170.236.247:3000/api/brands/${brandId}/cars`);
       const cars = response.data;
       return cars.length;
     } catch (error) {
@@ -83,7 +83,7 @@ const BrandListPage: React.FC<Props> = ({setBrands}) => {
     const nextPage = page + 1;
   
     try {
-      const response = await axios.get(`http://localhost:3000/api/brands?page=${nextPage}`);
+      const response = await axios.get(`http://16.170.236.247:3000/api/brands?page=${nextPage}`);
       const newb = response.data.map((brandData: any) => ({
         brand_id: brandData.brand_id,
         brand: brandData.brand,
@@ -125,12 +125,12 @@ const BrandListPage: React.FC<Props> = ({setBrands}) => {
       setDialogLoading(true);
       if (selectedBrand) {
         if (isServerOnline) {
-          await axios.delete(`http://localhost:3000/api/brands/${selectedBrand.brand_id}`);
+          await axios.delete(`http://16.170.236.247:3000/api/brands/${selectedBrand.brand_id}`);
         } else {
           const pendingApiCalls = JSON.parse(localStorage.getItem('pendingApiCalls') || '[]');
           pendingApiCalls.push({
             method: 'DELETE',
-            url: `http://localhost:3000/api/brands/${selectedBrand.brand_id}`,
+            url: `http://16.170.236.247:3000/api/brands/${selectedBrand.brand_id}`,
           });
           localStorage.setItem('pendingApiCalls', JSON.stringify(pendingApiCalls));
         }

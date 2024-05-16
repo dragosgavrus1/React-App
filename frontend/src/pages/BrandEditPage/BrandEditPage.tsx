@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { Link as RouterLink, useParams, useNavigate } from 'react-router-dom';
 import { Button, TextField, Typography } from '@mui/material';
-import { BrandsContext, ServerStatusContext } from '../../App';
+import { ServerStatusContext } from '../../App';
 import "./BrandEditPage.css";
 import axios from 'axios';
 
 const BrandEditPage: React.FC = () => {
     const navigate = useNavigate();
-    const brands = React.useContext(BrandsContext);
     const isServerOnline = React.useContext(ServerStatusContext);
     const { id } = useParams<{ id: string }>(); // Get the ID from the URL params
     const [brand, setBrand] = React.useState<string>('');

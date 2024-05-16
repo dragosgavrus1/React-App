@@ -59,7 +59,7 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
             const nextPage = page + 1; // Increment page number for the next page
             const brandName = carsContext[0].getMake();
             // const response = await axios.get(`http://localhost:3000/api/cars?page=${nextPage}`);
-            const response = await axios.get(`http://localhost:3000/api/cars/brand?brand=${brandName}&page=${nextPage}`);
+            const response = await axios.get(`http://16.170.236.247:3000/api/cars/brand?brand=${brandName}&page=${nextPage}`);
 
             const newCars = response.data.map((carData: any) => new Car(carData.id, carData.make, carData.model, carData.year, carData.color));
 
@@ -95,7 +95,7 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
             if (selectedCar) {
                 if(isServerOnline){
                     // Make a DELETE request to the backend API to delete the selected car
-                    await axios.delete(`http://localhost:3000/api/cars/${selectedCar.getId()}`);
+                    await axios.delete(`http://16.170.236.247:3000/api/cars/${selectedCar.getId()}`);
                 }
                 else{
                     const pendingApiCalls = JSON.parse(localStorage.getItem('pendingApiCalls') || '[]');
@@ -103,7 +103,7 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
                     // Add the new pending API call to the array
                     pendingApiCalls.push({
                     method: 'DELETE',
-                    url: 'http://localhost:3000/api/cars/' + selectedCar.getId(),
+                    url: 'http://16.170.236.247:3000/api/cars/' + selectedCar.getId(),
                     });
                 
                     // Save the updated array back to localStorage

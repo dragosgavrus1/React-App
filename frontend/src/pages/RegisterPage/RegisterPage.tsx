@@ -19,7 +19,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-        const response = await axios.post('http://localhost:3000/register', formData);
+        const response = await axios.post('http://16.170.236.247:3000/register', formData);
         // Your registration logic here
         console.log('Registration form submitted:', response.data);
         navigate('/login');

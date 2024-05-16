@@ -28,7 +28,7 @@ function App() {
 
   useEffect(() => {
     
-    const socket = io('http://localhost:3000', { transports: ['websocket'] });
+    const socket = io('http://16.170.236.247:3000', { transports: ['websocket'] });
   
     socket.on('newCar', (newCar: any) => {
       setIsServerOnline(true);
@@ -63,7 +63,7 @@ function App() {
       try {
         const brandName = localStorage.getItem('username');
         // const response = await axios.get(`http://localhost:3000/api/cars?page=${page}`);
-        const response = await axios.get(`http://localhost:3000/api/cars/brand?brand=${brandName}&page=${page}`);
+        const response = await axios.get(`http://16.170.236.247:3000/api/cars/brand?brand=${brandName}&page=${page}`);
         const carList = response.data.map((carData: any) => new Car(carData.id, carData.make, carData.model, carData.year, carData.color));
         if (page === 0) {
           setCars(carList);
@@ -81,7 +81,7 @@ function App() {
 
     const fetchBrands = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/brands?page=${page}`);
+        const response = await axios.get(`http://16.170.236.247:3000/api/brands?page=${page}`);
         const brandList = response.data.map((brand: any) => ({ brand_id: brand.brand_id, brand: brand.brand }));
         setBrands(brandList);
         console.log('brands:', brandList);
@@ -146,3 +146,6 @@ function App() {
 }
 
 export default App
+
+
+// rsync -avz --exclude 'node_modules' --exclude '.git' --exclude '.env' \ -e "ssh -i ~/.ssh/romania-dragos-pc.pem" \ . ubuntu@ec2-16-170-236-247.eu-north-1.compute.amazonaws.com:~/frontend

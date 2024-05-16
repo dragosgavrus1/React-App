@@ -33,7 +33,7 @@ const CarAddPage: React.FC<Props> = () => {
         // Add the new pending API call to the array
         pendingApiCalls.push({
           method: 'POST',
-          url: 'http://localhost:3000/api/cars',
+          url: 'http://16.170.236.247:3000/api/cars',
           data: carData
         });
       
@@ -60,7 +60,7 @@ const CarAddPage: React.FC<Props> = () => {
                 });
             }
             else {
-                const response = await axios.post('http://localhost:3000/api/cars', state);
+                const response = await axios.post('http://16.170.236.247:3000/api/cars', state);
                 const newCarData = response.data;
                 const newCar = new Car(newCarData.id, newCarData.make, newCarData.model, newCarData.year, newCarData.color);
                 cars.push(newCar);

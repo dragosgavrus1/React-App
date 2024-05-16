@@ -29,7 +29,7 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
         const fetchCar = async () => {
             if(isServerOnline){
                 try {
-                const response = await axios.get(`http://localhost:3000/api/cars/${id}`); // Fetch car details from the API
+                const response = await axios.get(`http://16.170.236.247:3000/api/cars/${id}`); // Fetch car details from the API
                 const responseCar = response.data[0];
                 const carData: Car = new Car(responseCar.id, responseCar.make, responseCar.model, responseCar.year, responseCar.color);
                 setState({make: carData.getMake(), model: carData.getModel(), year: carData.getYear(), color: carData.getColor()});
@@ -60,7 +60,7 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
         event.preventDefault();
         if(isServerOnline){
             try {
-            const response = await axios.put(`http://localhost:3000/api/cars/${id}`, state);
+            const response = await axios.put(`http://16.170.236.247:3000/api/cars/${id}`, state);
             
             const updatedCar: Car = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
             setCar(updatedCar);
@@ -80,7 +80,7 @@ const CarEditPage: React.FC<Props> = ({setCars}) => {
             const pendingApiCalls = JSON.parse(localStorage.getItem('pendingApiCalls') || '[]');
             pendingApiCalls.push({
                 method: 'PUT',
-                url: 'http://localhost:3000/api/cars/' + id,
+                url: 'http://16.170.236.247/api/cars/' + id,
                 data: state
             });
             localStorage.setItem('pendingApiCalls', JSON.stringify(pendingApiCalls));
