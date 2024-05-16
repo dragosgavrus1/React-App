@@ -19,8 +19,10 @@ const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const CarModel_1 = require("./models/CarModel");
 const CarBrand_1 = require("./models/CarBrand");
+const UserModel_1 = require("./models/UserModel");
 dotenv_1.default.config();
 const PORT = process.env.PORT || 3000;
 const MONGOURI = process.env.MONGOURI || 'mongodb://localhost:27017/CarsDB';
@@ -57,6 +59,19 @@ io.on('connection', (socket) => {
 //     res.status(500).json({ message: 'Internal server error' });
 //   }
 // });
+app.get('/api/cars/brand', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const page = parseInt(req.query.page);
+        const brand = req.query.brand; // Extract the brand name from the query parameters
+        console.log(req.query);
+        const cars = yield carsController.getCarsByBrand(page, brand); // Pass both page and brand to the controller
+        res.json(cars);
+    }
+    catch (error) {
+        console.error('Error getting cars:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
 // Get all entities
 app.get('/api/cars', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -243,6 +258,42 @@ app.delete('/api/brands/:id', (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
     catch (error) {
         console.error('Error deleting brand:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+// Check login information
+app.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { username, password } = req.body;
+    try {
+        const user = yield UserModel_1.UserModel.findOne({ username: username, password: password });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid username or password' });
+        }
+        const token = jsonwebtoken_1.default.sign({ username }, 'key', { expiresIn: '15m' });
+        return res.status(200).json({ message: 'Login successful', token });
+    }
+    catch (error) {
+        console.error('Error logging in:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}));
+app.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { username, password } = req.body;
+    try {
+        const brand = yield CarBrand_1.BrandModel.findOne({ brand: username });
+        if (!brand) {
+            return res.status(401).json({ message: 'Brand does not exist' });
+        }
+        const user = yield UserModel_1.UserModel.findOne({ username: username });
+        if (user) {
+            return res.status(401).json({ message: 'User already exists' });
+        }
+        const newUser = new UserModel_1.UserModel({ username, password });
+        yield newUser.save();
+        return res.status(201).json({ message: 'User registered successfully' });
+    }
+    catch (error) {
+        console.error('Error registering:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 }));

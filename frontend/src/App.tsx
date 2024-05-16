@@ -11,6 +11,8 @@ import { io } from 'socket.io-client';
 import BrandListPage from './pages/BrandListPage/BrandListPage'
 import BrandAddPage from './pages/BrandAddPage/BrandAddPage'
 import BrandEditPage from './pages/BrandEditPage/BrandEditPage'
+import LoginPage from './pages/LoginPage/LoginPage'
+import RegisterPage from './pages/RegisterPage/RegisterPage'
 
 export const CarsContext = createContext<Car[]>([]);
 export const BrandsContext = createContext<{ brand_id: number, brand: string }[]>([]);
@@ -21,7 +23,7 @@ function App() {
   const [brands, setBrands] = useState<{ brand_id: number, brand: string }[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isServerOnline, setIsServerOnline] = useState(true);
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
 
 
   useEffect(() => {
@@ -59,7 +61,9 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/cars?page=${page}`);
+        const brandName = localStorage.getItem('username');
+        // const response = await axios.get(`http://localhost:3000/api/cars?page=${page}`);
+        const response = await axios.get(`http://localhost:3000/api/cars/brand?brand=${brandName}&page=${page}`);
         const carList = response.data.map((carData: any) => new Car(carData.id, carData.make, carData.model, carData.year, carData.color));
         if (page === 0) {
           setCars(carList);
@@ -86,29 +90,11 @@ function App() {
       }
     };
     
-
     fetchData();
     fetchBrands();
   }, []);
 
-  // const addRandom = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:3000/api/cars/updates');
-  //     setIsServerOnline(true);
-  //     const newCar = new Car(response.data.id, response.data.make, response.data.model, response.data.year, response.data.color);
-  //     console.log('Received new car from server:', newCar);
-  //     setCars((prevCars) => [...prevCars, newCar]);
-  //   } catch (error) {
-  //     setIsServerOnline(false);
-  //     console.error('Error fetching updates:', error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const fetchDataInterval = setInterval(addRandom, 30000);
-
-  //   return () => clearInterval(fetchDataInterval);
-  // }, [addRandom, 30000]);
+  
 
   useEffect(() => {
     if (isOnline && isServerOnline) {
@@ -147,6 +133,8 @@ function App() {
                 <Route path='/brands' element={<BrandListPage setBrands={setBrands} />} />
                 <Route path='/brands/add' element={<BrandAddPage/>} />
                 <Route path='/brands/edit/:id' element={<BrandEditPage/>} />
+                <Route path='/login' element={<LoginPage/>} />
+                <Route path='/register' element={<RegisterPage/>} />
               </Routes>
 
             </div>

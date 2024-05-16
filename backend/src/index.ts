@@ -6,8 +6,10 @@ import http from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 import { ICar, CarModel } from './models/CarModel';
 import { IBrand, BrandModel } from './models/CarBrand';
+import { UserModel } from './models/UserModel';
 
 
 dotenv.config();
@@ -53,6 +55,19 @@ io.on('connection', (socket) => {
 //   }
 // });
 
+
+app.get('/api/cars/brand', async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string);
+    const brand = req.query.brand as string; // Extract the brand name from the query parameters
+    console.log(req.query)
+    const cars = await carsController.getCarsByBrand(page, brand); // Pass both page and brand to the controller
+    res.json(cars);
+  } catch (error) {
+    console.error('Error getting cars:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 // Get all entities
 app.get('/api/cars', async (req: Request, res: Response) => {
@@ -258,6 +273,49 @@ app.delete('/api/brands/:id', async (req: Request, res: Response) => {
     res.json({ message: 'Brand deleted successfully' });
   } catch (error) {
     console.error('Error deleting brand:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Check login information
+app.post('/login', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  try {
+    const user = await UserModel.findOne({username : username, password : password});
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
+    const token = jwt.sign({ username }, 'key', { expiresIn: '15m' });
+
+    return res.status(200).json({ message: 'Login successful', token });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/register', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  try {
+    const brand = await BrandModel.findOne({brand : username});
+
+    if (!brand) {
+      return res.status(401).json({ message: 'Brand does not exist' });
+    }
+    const user = await UserModel.findOne({username: username});
+
+    if (user) {
+      return res.status(401).json({ message: 'User already exists' });
+    }
+
+    const newUser = new UserModel({username, password});
+    await newUser.save();
+
+    return res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Error registering:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

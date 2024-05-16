@@ -57,8 +57,10 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
     const loadMoreCars = async () => {
         try {
             const nextPage = page + 1; // Increment page number for the next page
+            const brandName = carsContext[0].getMake();
+            // const response = await axios.get(`http://localhost:3000/api/cars?page=${nextPage}`);
+            const response = await axios.get(`http://localhost:3000/api/cars/brand?brand=${brandName}&page=${nextPage}`);
 
-            const response = await axios.get(`http://localhost:3000/api/cars?page=${nextPage}`);
             const newCars = response.data.map((carData: any) => new Car(carData.id, carData.make, carData.model, carData.year, carData.color));
 
             // Filter out the cars that are already present in the state
@@ -72,7 +74,7 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
         } catch (error) {
           console.error('Error fetching next page of cars:', error);
         }
-      };
+    };
       
 
     const handleCarClick = (car: Car) => {
@@ -141,6 +143,25 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
         <div className='car-list-page' data-testid='car-list-page'>
             <Typography variant="h3">List of Cars</Typography>
 
+            <div>
+                <Link component={RouterLink} to="/brands">
+                    <Button className='MuiButton normal-button'>View Brands</Button>
+                </Link>
+            </div>
+
+            <div>
+                <Link component={RouterLink} to="/login">
+                    <Button className='MuiButton normal-button'>Profile</Button>
+                </Link>
+            </div>
+
+            <div>
+                <Link component={RouterLink} to="/add">
+                    <Button className='MuiButton normal-button'>Add Car</Button>
+                </Link>
+            </div>
+
+
             <PieChart 
                     series={[
                         {
@@ -154,19 +175,6 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
                         },
                     }}
             />
-
-            <div>
-                <Link component={RouterLink} to="/brands">
-                    <Button className='MuiButton normal-button'>View Brands</Button>
-                </Link>
-            </div>
-
-            <div>
-                <Link component={RouterLink} to="/add">
-                    <Button className='MuiButton normal-button'>Add Car</Button>
-                </Link>
-            </div>
-
             
             {selectedCar && (
                 <Link component={RouterLink} to={`/car/${selectedCar.getId()}`}>

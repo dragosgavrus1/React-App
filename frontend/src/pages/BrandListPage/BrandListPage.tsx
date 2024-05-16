@@ -149,7 +149,7 @@ const BrandListPage: React.FC<Props> = ({setBrands}) => {
       <Typography variant='h3'>List of Brands</Typography>
 
       <RouterLink to="/">
-        <Button>Back to Home</Button>
+        <Button className='normal-button'>Back to Home</Button>
       </RouterLink>
       <div>
         <Link component={RouterLink} to='/brands/add'>
@@ -207,7 +207,7 @@ const BrandListPage: React.FC<Props> = ({setBrands}) => {
 
       {!loading && (
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <Button onClick={loadMoreBrands}>Load More Brands</Button>
+          <Button onClick={loadMoreBrands} className='normal-button'>Load More Brands</Button>
         </div>
       )}
     </div>

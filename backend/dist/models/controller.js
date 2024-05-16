@@ -14,6 +14,24 @@ const faker_1 = require("@faker-js/faker");
 const CarModel_1 = require("./CarModel");
 const CarBrand_1 = require("./CarBrand");
 class CarList {
+    getCarsByBrand(page, brand) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const pageSize = 50;
+                const skip = page * pageSize;
+                // Retrieve only the required fields from the database
+                const cars = yield CarModel_1.CarModel.find({ make: brand }, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 })
+                    .skip(skip)
+                    .limit(pageSize);
+                // Return the retrieved documents
+                return cars;
+            }
+            catch (error) {
+                console.error('Error getting cars:', error);
+                return [];
+            }
+        });
+    }
     addCar(carData) {
         return __awaiter(this, void 0, void 0, function* () {
             const brand = yield CarBrand_1.BrandModel.findOne({ brand: carData.make });

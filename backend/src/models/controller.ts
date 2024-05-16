@@ -6,6 +6,23 @@ import { BrandModel } from './CarBrand';
 
 
 export class CarList {
+  public async getCarsByBrand(page: number, brand: string) {
+    try {
+      const pageSize = 50;
+      const skip = page * pageSize;
+
+      // Retrieve only the required fields from the database
+      const cars = await CarModel.find({make:brand}, { _id: 0, id: 1, make: 1, model: 1, year: 1, color: 1 })
+                                  .skip(skip)
+                                  .limit(pageSize);
+  
+      // Return the retrieved documents
+      return cars;
+    } catch (error) {
+      console.error('Error getting cars:', error);
+      return [];
+    }
+  }
 
   public async addCar(carData: any): Promise<ICar> {
     const brand = await BrandModel.findOne({brand : carData.make});
