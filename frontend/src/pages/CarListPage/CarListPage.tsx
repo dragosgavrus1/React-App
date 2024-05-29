@@ -214,7 +214,6 @@ const CarListPage: React.FC<Props> = ({ setCars }) => {
                         )}
                     </TableBody>
                     
-                    =
                 </Table>
             </TableContainer>
 

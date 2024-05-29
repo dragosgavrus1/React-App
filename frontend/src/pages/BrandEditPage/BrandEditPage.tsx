@@ -58,7 +58,7 @@ const BrandEditPage: React.FC = () => {
     };
 
     if (loading) {
-        return <Typography variant="h3">Loading...</Typography>;
+        return <Typography variant="h3" data-testid='brand-edit-page'>Loading...</Typography>;
     }
 
     return (

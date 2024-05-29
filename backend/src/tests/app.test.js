@@ -115,4 +115,45 @@ describe('Test API endpoints', () => {
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true); // Check if response is an array
   });
+
+  it('should register a new user', async () => {
+    const newUser = {
+      username: 'Fiat',
+      password: 'password123',
+    };
+    const res = await request(app).post('/register').send(newUser);
+    expect(res.statusCode).toEqual(201);
+    expect(res.body).toHaveProperty('message', 'User registered successfully');
+  });
+
+  it('should not register an existing user', async () => {
+    const existingUser = {
+      username: 'Fiat',
+      password: 'password123',
+    };
+    const res = await request(app).post('/register').send(existingUser);
+    expect(res.statusCode).toEqual(401);
+    expect(res.body).toHaveProperty('message', 'User already exists');
+  });
+
+  it('should log in with valid credentials', async () => {
+    const credentials = {
+      username: 'Fiat',
+      password: 'password123',
+    };
+    const res = await request(app).post('/login').send(credentials);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('message', 'Login successful');
+    expect(res.body).toHaveProperty('token');
+  });
+
+  it('should not log in with invalid credentials', async () => {
+    const invalidCredentials = {
+      username: 'invalid',
+      password: 'wrongPassword',
+    };
+    const res = await request(app).post('/login').send(invalidCredentials);
+    expect(res.statusCode).toEqual(401);
+    expect(res.body).toHaveProperty('message', 'Invalid username or password');
+  });
 });

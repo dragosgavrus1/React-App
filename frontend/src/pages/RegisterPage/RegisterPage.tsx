@@ -33,7 +33,7 @@ const RegisterPage = () => {
       <Typography variant="h5" component="h1" gutterBottom>
         Register Page
       </Typography>
-      <form className="register-form" onSubmit={handleSubmit}>
+      <form className="register-form" onSubmit={handleSubmit} data-testid='register-form'>
         <TextField
           label="Username"
           variant="outlined"
@@ -54,7 +54,7 @@ const RegisterPage = () => {
           onChange={handleChange}
           required
         />
-        <Button variant="contained" type="submit" className="buttons">Register</Button>
+        <Button variant="contained" type="submit" className="buttons" data-testid='register-button'>Register</Button>
         <RouterLink to="/">
             <Button className='buttons'>Back to Home</Button>
         </RouterLink>

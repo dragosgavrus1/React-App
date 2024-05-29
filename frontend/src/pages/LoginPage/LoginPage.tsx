@@ -107,7 +107,7 @@ const LoginPage = () => {
           <Button variant="contained" onClick={logout} className='buttons'>Logout</Button>
         </div>
       ) : (
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit} data-testid='login-form'>
           <TextField
             label="Username"
             variant="outlined"
@@ -128,7 +128,7 @@ const LoginPage = () => {
             onChange={handleChange}
             required
           />
-          <Button variant="contained" type='submit' className="buttons">Login</Button>
+          <Button variant="contained" type='submit' className="buttons" data-testid='login-button'>Login</Button>
           <Button variant="contained" onClick={handleRegister} className='buttons'>Register</Button>
         </form>
       )}
